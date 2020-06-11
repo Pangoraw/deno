@@ -2,7 +2,7 @@
 use crate::file_fetcher::map_file_extension;
 use crate::op_error::OpError;
 use crate::swc_common::comments::CommentKind;
-use crate::swc_common::Span;
+use crate::swc_common::{BytePos, Span};
 use crate::swc_ecma_ast;
 use crate::swc_ecma_ast::Decl;
 use crate::swc_ecma_ast::DefaultDecl;
@@ -318,7 +318,11 @@ impl DocParser {
         }
         let (name, function_def) =
           super::function::get_doc_for_fn_decl(fn_decl);
-        let (js_doc, location) = self.details_for_span(fn_decl.function.span);
+        let declare_span = fn_decl
+          .function
+          .span
+          .with_lo(fn_decl.function.span.lo() - BytePos(8));
+        let (js_doc, location) = self.details_for_span(declare_span);
         Some(DocNode {
           kind: DocNodeKind::Function,
           name,
